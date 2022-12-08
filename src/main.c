@@ -12,7 +12,6 @@
 #define bit_is_set_bool(sfr, bit) (bit_is_set(sfr, bit) >> bit)
 
 #include <avr/io.h>
-#include <std>
 #include <avr/interrupt.h>
 
 unsigned long clk = 0;

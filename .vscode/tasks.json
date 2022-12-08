@@ -1,0 +1,64 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build",
+            "type": "shell",
+            "command": "make build",
+            "group": "build",
+        },
+        {
+            "label": "Program flash",
+            "type": "shell",
+            "command": "make program-flash",
+        },
+        {
+            "label": "Program flash & EEPROM",
+            "type": "shell",
+            "command": "make program-all",
+        },
+    ],
+    "inputs": [
+        {
+            "id": "MCU",
+            "type": "pickString",
+            "description": "Select the target MCU",
+            "default": "atmega328p",
+            "options": [
+                "atmega328p",
+                "attiny13"
+            ],
+        },
+        {
+            "id": "programmer",
+            "type": "pickString",
+            "description": "Select the avrdude programmer",
+            "default": "arduino",
+            "options": [
+                "arduino",
+                "ft232r_custom",
+                "stk500"
+            ],
+        },
+        {
+            "id": "baudrate",
+            "type": "pickString",
+            "description": "Select the baudrate",
+            "default": "19200",
+            "options": [
+                "9600",
+                "19200",
+                "57600",
+                "115200",
+                "576000",
+            ],
+        },
+        {
+            "id": "port",
+            "type": "promptString",
+            "description": "COM port to use",
+        }
+    ]
+}
