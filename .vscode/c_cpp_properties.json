@@ -2,11 +2,12 @@
     "configurations": [
         {
             "name": "avr",
-            "compilerPath": "C:/Users/Amine/AppData/Local/Programs/avr-gcc/bin/avr-gcc.exe",
+            "compilerPath": "${env:LOCALAPPDATA}/Programs/avr-gcc/bin/avr-gcc.exe",
             "includePath": [
-                "${workspaceFolder}/**",
-                "C:/Users/Amine/AppData/Local/Programs/avr-gcc/avr/include",
-                "C:/Users/Amine/AppData/Local/Programs/avr-gcc/lib/gcc/avr/12.1.0/include",
+                "${workspaceFolder}/src/**",
+                "${workspaceFolder}/lib/**",
+                "${env:LOCALAPPDATA}/Programs/avr-gcc/avr/include",
+                "${env:LOCALAPPDATA}/Programs/avr-gcc/lib/gcc/avr/12.1.0/include",
             ],
             "defines": [
                 "__AVR_ATtiny13__"
