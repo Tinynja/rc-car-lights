@@ -13,6 +13,9 @@
             "label": "Program flash",
             "type": "shell",
             "command": "make program-flash",
+            "presentation": {
+                "reveal": "never",
+            }
         },
         {
             "label": "Program flash & EEPROM",

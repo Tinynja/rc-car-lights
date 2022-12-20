@@ -1,10 +1,19 @@
-TARGET=RC_Car_Lights
+TARGET=RC_Car_Lights_$(MCU)
 
 #Programmer options
-MCU?=attiny13
-PROGRAMMER?=ft232r_custom
-BAUD?=76800
-PORT?=COM8
+ifeq ($(MCU),attiny13)
+	PROGRAMMER?=ft232r_custom
+	BAUD?=76800
+	PORT?=COM8
+else ifeq ($(MCU),atmega328p)
+	PROGRAMMER?=arduino
+	PORT?=COM6
+else
+	MCU?=
+	PROGRAMMER?=
+	BAUD?=
+	PORT?=
+endif
 
 #TESTS
 ifdef TEST
@@ -21,8 +30,8 @@ BUILD_DIR=build
 
 
 #Libraries
-LIBS?=$(wildcard $(LIB_DIR)/*/)
-LIBS_A=$(LIBS:$(LIB_DIR)/%/=$(LIB_DIR)/lib%.a)
+# LIBS?=$(filter-out %.a,$(wildcard $(LIB_DIR)/*))
+LIBS_A=$(LIBS:$(LIB_DIR)/%=$(LIB_DIR)/lib%.a)
 INCLUDES=$(addprefix -I,$(LIBS))
 
 CFLAGS=-mmcu=$(MCU) $(INCLUDES) -Os -flto -funsigned-char -funsigned-bitfields -ffunction-sections -fdata-sections -Wall -Wno-int-conversion -Wno-comment
@@ -47,10 +56,7 @@ else
 	FixPath=$1
 endif
 
-test:
-	echo $(LIBS)
-	echo $(LIBS_A)
-	echo $(INCLUDES)
+
 .PHONY: all
 all: $(addprefix $(BIN_DIR)/,$(TARGET).elf $(TARGET).eep $(TARGET).hex)
 
@@ -58,7 +64,7 @@ all: $(addprefix $(BIN_DIR)/,$(TARGET).elf $(TARGET).eep $(TARGET).hex)
 build: $(BIN_DIR)/$(TARGET).elf
 
 $(BIN_DIR)/$(TARGET).elf: $(OBJ_LIST) $(LIBS_A) $(BIN_DIR)/ $(BUILD_DIR)/
-	avr-gcc $(CFLAGS) -dumpdir $(BUILD_DIR) -Wl,--print-memory-usage -Wl,-Map=build/$(TARGET).map $(filter %.o,$^) $(filter %.a,$^) -o $@
+	avr-gcc $(CFLAGS) -dumpdir $(BUILD_DIR) -Wl,-Map=build/$(TARGET).map -Wl,--cref -Wl,--print-memory-usage $(filter %.o,$^) $(filter %.a,$^) -o $@
 
 $(BIN_DIR)/$(TARGET).hex: $(BIN_DIR)/$(TARGET).elf
 	avr-objcopy -R .eeprom -R .fuse -R .lock -R .signature -R .user_signatures -O ihex $< $@
@@ -71,7 +77,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c Makefile $(OBJ_DIR)/
 	avr-gcc $(CFLAGS) -S $< -o $(@:%.o=%.s)
 
 #Static library build rules
-$(LIB_DIR)/lib%.a: $(OBJ_DIR)/%/ $(LIB_DIR)/%/*.c $(LIB_DIR)/%/*.h
+$(LIB_DIR)/lib%.a: $(OBJ_DIR)/%/ $(LIB_DIR)/%/*.c $(LIB_DIR)/%/*.h Makefile
 	cd $< && avr-gcc $(CFLAGS) -c $(addprefix ../../,$(filter %.c,$^))
 	avr-ar $(ARFLAGS) rcs $@ $(patsubst $(LIB_DIR)/%.c,$(OBJ_DIR)/%.o,$(filter %.c,$^))
 
