@@ -1,17 +1,18 @@
 #include "config.h"
 #include <avr/interrupt.h>
 
+// Constants
+#define CYCLES_PER_MS	((F_CPU/100/256+5)/10)
+#define HYSTERESIS		1
+
 // Utils
 #define bit_is_set_bool(sfr, bit) (bit_is_set(sfr, bit) >> bit)
 #define bit_is_clear_bool(sfr, bit) (!(bit_is_set(sfr, bit) >> bit))
-#define _EXPAND(pre, var, post) (pre ## var ## post)
-// _EXPAND is needed because '##' inhibits macro expansion
-
+#define _EXPAND(pre, var, post) (pre ## var ## post) // needed because '##' inhibits macro expansion
 
 // RxChConfig macros
 #define ddrx portx-1
 #define pinx portx-2
-
 
 // I/O register macros
 #define GBIT(io)	_GBIT(io)
@@ -24,7 +25,6 @@
 #define _GPIN(p,b)	(PIN ## p)
 #define GPORT_LETTER(io)	_GPORT_LETTER(io)
 #define _GPORT_LETTER(p,b)	p
-
 
 // Timer register
 #define TCCRnA		_TCCRnA(TIMER_NUMBER)
@@ -62,7 +62,6 @@
 #define _OCRnA(n)	_EXPAND(OCR,n,A)
 #define OCRnB		_OCRnB(TIMER_NUMBER)
 #define _OCRnB(n)	_EXPAND(OCR,n,B)
-
 
 // Interrupts
 #if defined(TIM0_OVF_vect)
