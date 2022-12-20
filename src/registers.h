@@ -5,11 +5,6 @@
 #define CYCLES_PER_MS	((F_CPU/100/256+5)/10)
 #define HYSTERESIS		1
 
-// Utils
-#define bit_is_set_bool(sfr, bit) (bit_is_set(sfr, bit) >> bit)
-#define bit_is_clear_bool(sfr, bit) (!(bit_is_set(sfr, bit) >> bit))
-#define _EXPAND(pre, var, post) (pre ## var ## post) // needed because '##' inhibits macro expansion
-
 // RxChConfig macros
 #define ddrx portx-1
 #define pinx portx-2
