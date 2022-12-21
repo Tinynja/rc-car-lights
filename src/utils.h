@@ -1,3 +1,8 @@
+#ifndef UTILS_H
+#define UTILS_H
+
+uint8_t clamp(uint8_t value, uint8_t min, uint8_t max);
+
 // Utils
 #define bit_is_set_bool(sfr, bit) (bit_is_set(sfr, bit) >> bit)
 #define bit_is_clear_bool(sfr, bit) (!(bit_is_set(sfr, bit) >> bit))
@@ -24,3 +29,5 @@
          NEEDS_BIT(N, 26) + NEEDS_BIT(N, 27) + \
          NEEDS_BIT(N, 28) + NEEDS_BIT(N, 29) + \
          NEEDS_BIT(N, 30) + NEEDS_BIT(N, 31))
+
+#endif //UTILS_H

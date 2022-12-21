@@ -1,3 +1,6 @@
+#ifndef REGISTERS_H
+#define REGISTERS_H
+
 #include "config.h"
 #include <avr/interrupt.h>
 
@@ -122,3 +125,5 @@
 #else
 	#error PCINT_CH1 and PCINT_CH2 in `config.h` must be in the same PCMSK register
 #endif
+
+#endif //REGISTERS_H

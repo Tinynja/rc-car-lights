@@ -1,11 +1,13 @@
-#include "config.h"
+#include "typedefs.h"
 #include "registers.h"
+#include "config.h"
 #include "utils.h"
+#include "ui.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/eeprom.h>
 
-// The variables corresponding to these defaults can be set in runtime
+// The following values can be calibrated in runtime
 #define DEFAULT_PW_MIN		CYCLES_PER_MS*5/4
 #define DEFAULT_PW_RANGE	CYCLES_PER_MS/2
 #define DEFAULT_REVERSE		0
@@ -29,38 +31,18 @@ At 16MHz:
 uint16_t clk; // 1/CYCLES_PER_MS step clock
 uint8_t clk_0s1; // ~0.1s step clock
 
-uint8_t clamp(uint8_t value, uint8_t min, uint8_t max) {
-	if (value < min) {
-		return min;
-	} else if (value > max) {
-		return max;
-	} else {
-		return value;
-	}
-}
+struct Config_t Config = {
+	127, 127, 255, 1
+};
 
-struct {
-	uint8_t portx; // WARNING: Change size if using an MCU with I/O addresses higher 0x3F
-	uint8_t pbx;
-	uint8_t pw_min; // minimum pulse width
-	uint8_t pw_range; // pulse width range
-	uint8_t reverse; // channel reversing
-	uint8_t low_band;
-	uint8_t high_band;
-} RxChConfig[2] = {
+struct RxChConfig_t RxChConfig[2] = {
 	{&GPORT(RX_CH1), GBIT(RX_CH1), DEFAULT_PW_MIN, DEFAULT_PW_RANGE, 0, DEFAULT_LOW_BAND, DEFAULT_HIGH_BAND},
 	{&GPORT(RX_CH2), GBIT(RX_CH2), DEFAULT_PW_MIN, DEFAULT_PW_RANGE, 0, DEFAULT_LOW_BAND, DEFAULT_HIGH_BAND},
 };
 
-struct {
-	uint8_t rising_edge_time;
-	uint8_t value_raw; // could be removed if flash space is limited
-	uint8_t value;
-	uint8_t state;
-	uint8_t band;
-	uint8_t band_start_time; // in ~0.1s unit
-	uint8_t band_duration; // could be removed if flash space is limited
-} RxCh[2];
+struct RxCh_t RxCh[2];
+
+uint8_t ui_state = 0;
 
 
 int main(void) {
@@ -110,23 +92,49 @@ int main(void) {
 					}
 					RxCh[i].band_start_time = clk_0s1;
 					RxCh[i].band_duration = 0;
-			} else if (RxCh[i].band_duration < 255) {
+			} else if (RxCh[i].band_duration <= 254) {
 				RxCh[i].band_duration = clk_0s1 - RxCh[i].band_start_time;
 			}
 		}
 
-		if (RxCh[0].band == 1 || RxCh[0].band_duration > 15) {
-			OCRnA = 0;
-		} else {
-			switch (RxCh[0].band)
-			{
-			case 0:
-				OCRnA = 255;
+		switch (ui_state) {
+			case UI_CONFIGURATION:
+				ui_configuration();
+				break;
+			case UI_CFG_FRONT:
+				ui_cfg_front();
+				break;
+			case UI_CFG_REAR:
+				ui_cfg_rear();
+				break;
+			case UI_CFG_BRAKE:
+				ui_cfg_brake();
+				break;
+			case UI_CFG_BLINKERS:
+				ui_cfg_blinkers();
+				break;
+			case UI_CFG_CHREVERSE:
+				ui_cfg_chreverse();
+				break;
+			case UI_CFG_CALIBRATION:
+				ui_cfg_calibration();
 				break;
 			default:
-				OCRnA = 40;
-			}
+				ui_main();
 		}
+		
+		// if (RxCh[0].band == 1 || RxCh[0].band_duration > 15) {
+		// 	OCRnA = 0;
+		// } else {
+		// 	switch (RxCh[0].band)
+		// 	{
+		// 	case 0:
+		// 		OCRnA = 255;
+		// 		break;
+		// 	default:
+		// 		OCRnA = 40;
+		// 	}
+		// }
 	}
 }
 
@@ -151,3 +159,33 @@ ISR(PCINT_vect) {
 		RxCh[i].state = new_state;
 	}
 }
+
+uint8_t clamp(uint8_t value, uint8_t min, uint8_t max) {
+	if (value < min) {
+		return min;
+	} else if (value > max) {
+		return max;
+	} else {
+		return value;
+	}
+}
+
+// uint8_t multiply_fraction_repeatedly(uint8_t a, uint8_t b_num, uint8_t b_den, uint8_t n) {
+//     // Multiply number *a* by fraction *b_num/b_den*, *n* times,
+//     // round to neareast unit each time
+//     // WARNING: choose b_num wisely so that 2*a*b_num does not exceed sizeof(int)
+//     for (uint8_t i = 1; i <= n; i++)
+//         // (2*___+1)/2 rounds to unit without using floats
+//         a = (2*a*b_num/b_den+1)/2;
+//     return a;
+// }
+
+// uint8_t normalize_pwm(uint8_t pwm) {
+//     if (pwm <= 19) {
+//         return pwm;
+//     } else if (pwm <= 27) {
+//         return multiply_fraction_repeatedly(20, 34, 29, pwm-19);
+//     } else {
+//         return multiply_fraction_repeatedly(255, 29, 34, 35-pwm);
+//     }
+// }
