@@ -10,6 +10,10 @@
 #define UI_CFG_CHREVERSE	6
 #define UI_CFG_CALIBRATION	7
 
+struct Ui_t {
+	uint8_t page;
+};
+
 void ui_main();
 
 void ui_configuration();

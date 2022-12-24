@@ -4,6 +4,9 @@
 #include "config.h"
 #include <avr/interrupt.h>
 
+// Register utils
+#define _EXPAND(pre, var, post) (pre ## var ## post) // needed because '##' inhibits macro expansion
+
 // Constants
 #define CYCLES_PER_MS	((F_CPU/100/256+5)/10)
 #define HYSTERESIS		1
@@ -13,16 +16,16 @@
 #define pinx portx-2
 
 // I/O register macros
-#define GBIT(io)	_GBIT(io)
-#define _GBIT(p,b)	b
-#define GPORT(io)	_GPORT(io)
-#define _GPORT(p,b) (PORT ## p)
-#define GDDR(io)	_GDDR(io)
-#define _GDDR(p,b)	(DDR ## p)
-#define GPIN(io)	_GPIN(io)
-#define _GPIN(p,b)	(PIN ## p)
-#define GPORT_LETTER(io)	_GPORT_LETTER(io)
-#define _GPORT_LETTER(p,b)	p
+#define GPORT(p)	_GPORT(p)
+#define _GPORT(p)	_EXPAND(PORT,p,)
+#define GDDR(p)		_GDDR(p)
+#define _GDDR(p)	_EXPAND(DDR,p,)
+#define GPIN(p)		_GPIN(p)
+#define _GPIN(p)	_EXPAND(PIN,p,)
+
+#define LEFT_RIGHT_MASK		(_BV(LIGHTS_LEFT) | _BV(LIGHTS_RIGHT))
+#define FRONT_REAR_MASK		(_BV(LIGHTS_FRONT) | _BV(LIGHTS_REAR))
+#define ALL_MASK			(LEFT_RIGHT_MASK | FRONT_REAR_MASK)
 
 // Timer register
 #define TCCRnA		_TCCRnA(TIMER_NUMBER)

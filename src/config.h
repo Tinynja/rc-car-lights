@@ -6,35 +6,43 @@
 	#define F_CPU			16000000UL
 	#define OSCCAL_VALUE	0x7D // OPTIONAL
 
+	// LIGHTS_FRONT and LIGHTS_REAR must be the pins OCnA and OCnB associated
+	// with the chosen TIMER_NUMBER (check MCU datasheet)
 	#define TIMER_NUMBER	0 // MUST BE AN 8-bit TIMER
+	#define LIGHTS_PORT		B
+	#define LIGHTS_FRONT	0
+	#define LIGHTS_REAR		1
+	#define LIGHTS_LEFT		3
+	#define LIGHTS_RIGHT	4
 
-	#define RX_CH1			B,2
-	#define RX_CH2			B,5
-	#define LIGHTS_FRONT	B,0 // MUST BE OCnA PIN, WHERE n IS TIMER_NUMBER
-	#define LIGHTS_REAR		B,1 // MUST BE OCnB PIN, WHERE n IS TIMER_NUMBER
-	#define LIGHTS_LEFT		B,3
-	#define LIGHTS_RIGHT	B,4
+	// RX_CH1 and RX_CH2 must both be PCINT pins that are part of the same
+	// PCMSK register (check MCU datasheet)
+	#define RX_PORT		B
+	#define RX_CH1		2
+	#define RX_CH2		5
+	#define PCINT_CH1	2
+	#define PCINT_CH2	5
 
-	// Check datasheet for PCINT# associated with pin for RX_CH1 & RX_CH2
-	// Both pins must be part of the same PCMSK register.
-	#define PCINT_CH1		2
-	#define PCINT_CH2		5
 #elif defined(__AVR_ATmega328P__)
 	#define F_CPU			16000000UL
 
+	// LIGHTS_FRONT and LIGHTS_REAR must be the pins OCnA and OCnB associated
+	// with the chosen TIMER_NUMBER (check MCU datasheet)
 	#define TIMER_NUMBER	0 // MUST BE AN 8-bit TIMER
-
-	#define RX_CH1			D,2
-	#define RX_CH2			D,3
-	#define LIGHTS_FRONT	D,6 // MUST BE OCnA PIN, WHERE n IS TIMER_NUMBER
-	#define LIGHTS_REAR		D,5 // MUST BE OCnB PIN, WHERE n IS TIMER_NUMBER
-	#define LIGHTS_LEFT		D,4
-	#define LIGHTS_RIGHT	D,7
-
-	// Check datasheet for PCINT# associated with pin for RX_CH1 & RX_CH2
-	// Both pins must be part of the same PCMSK register.
+	#define LIGHTS_PORT		D
+	#define LIGHTS_FRONT	6
+	#define LIGHTS_REAR		5
+	#define LIGHTS_LEFT		4
+	#define LIGHTS_RIGHT	7
+	
+	// RX_CH1 and RX_CH2 must both be PCINT pins that are part of the same
+	// PCMSK register (check MCU datasheet)
+	#define RX_PORT		D
+	#define RX_CH1		2
+	#define RX_CH2		3
 	#define PCINT_CH1	18
 	#define PCINT_CH2	19
+
 #else
 	#error "Unsupported microcontroller! Please configure the pins/timers/registers/interrupts for it."
 #endif
