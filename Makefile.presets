@@ -1,0 +1,20 @@
+#MCU and programmer presets
+
+ifeq ($(PRESET),attiny13)
+	MCU=attiny13
+	PROGRAMMER=ft232r_custom
+	BAUD=76800
+	PORT=COM8
+	LIBS=
+else ifeq ($(PRESET),atmega328p)
+	MCU=atmega328p
+	PROGRAMMER=arduino
+	PORT=COM6
+	LIBS=
+else ifeq ($(PRESET),test)
+	MCU=atmega328p
+	PROGRAMMER=arduino
+	PORT=COM6
+	SRC_DIR=test
+	LIBS=
+endif

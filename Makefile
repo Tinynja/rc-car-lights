@@ -1,25 +1,12 @@
 TARGET=RC_Car_Lights_$(MCU)
 
-#Programmer options
-ifeq ($(MCU),attiny13)
-	PROGRAMMER?=ft232r_custom
-	BAUD?=76800
-	PORT?=COM8
-else ifeq ($(MCU),atmega328p)
-	PROGRAMMER?=arduino
-	PORT?=COM6
-else
-	MCU?=
-	PROGRAMMER?=
-	BAUD?=
-	PORT?=
-endif
+-include Makefile.presets
 
-#TESTS
-ifdef TEST
-	LIBS=$(addprefix $(LIB_DIR)/,usart/)
-	SRC_DIR=test
-endif
+#MCU and programmer
+MCU?=
+PROGRAMMER?=
+BAUD?=
+PORT?=
 
 #Folder structure
 BIN_DIR=bin
@@ -30,7 +17,7 @@ BUILD_DIR=build
 
 
 #Libraries
-# LIBS?=$(filter-out %.a,$(wildcard $(LIB_DIR)/*))
+LIBS?=$(filter-out %.a,$(wildcard $(LIB_DIR)/*))
 LIBS_A=$(LIBS:$(LIB_DIR)/%=$(LIB_DIR)/lib%.a)
 INCLUDES=$(addprefix -I,$(LIBS))
 
@@ -44,15 +31,19 @@ SRC_LIST=$(wildcard $(SRC_DIR)/*.c)
 OBJ_LIST=$(SRC_LIST:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 DEP_LIST=$(SRC_LIST:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.d)
 
+VARDEP=$(BUILD_DIR)/$(1).$($(1)).VARDEP
+
 ifeq ($(OS),Windows_NT)
 	RM=del /s /q /f
 	RMDIR=rmdir /s /q
 	MKDIR=mkdir
+	TOUCH=type nul >
 	FixPath=$(subst /,\,$1)
 else
 	RM=rm -rf
 	RMDIR=$(RM)
 	MKDIR=mkdir -p
+	TOUCH=touch
 	FixPath=$1
 endif
 
@@ -63,7 +54,7 @@ all: $(addprefix $(BIN_DIR)/,$(TARGET).elf $(TARGET).eep $(TARGET).hex)
 #Target build rules
 build: $(BIN_DIR)/$(TARGET).elf
 
-$(BIN_DIR)/$(TARGET).elf: $(OBJ_LIST) $(LIBS_A) $(BIN_DIR)/ $(BUILD_DIR)/
+$(BIN_DIR)/$(TARGET).elf: $(OBJ_LIST) $(LIBS_A) $(BIN_DIR)/ $(BUILD_DIR)/ $(call VARDEP,MCU)
 	avr-gcc $(CFLAGS) -dumpdir $(BUILD_DIR) -Wl,-Map=build/$(TARGET).map -Wl,--cref -Wl,--print-memory-usage $(filter %.o,$^) $(filter %.a,$^) -o $@
 
 $(BIN_DIR)/$(TARGET).hex: $(BIN_DIR)/$(TARGET).elf
@@ -72,17 +63,22 @@ $(BIN_DIR)/$(TARGET).hex: $(BIN_DIR)/$(TARGET).elf
 $(BIN_DIR)/$(TARGET).eep: $(BIN_DIR)/$(TARGET).elf
 	avr-objcopy -j .eeprom  --set-section-flags=.eeprom=alloc,load --change-section-lma .eeprom=0 --no-change-warnings -O ihex $< $@
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c Makefile $(OBJ_DIR)/
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(OBJ_DIR)/ Makefile $(call VARDEP,MCU)
 	avr-gcc $(CFLAGS) -MMD -c $< -o $@
 	avr-gcc $(CFLAGS) -S $< -o $(@:%.o=%.s)
 
 #Static library build rules
-$(LIB_DIR)/lib%.a: $(OBJ_DIR)/%/ $(LIB_DIR)/%/*.c $(LIB_DIR)/%/*.h Makefile
+$(LIB_DIR)/lib%.a: $(LIB_DIR)/%/*.c $(LIB_DIR)/%/*.h $(OBJ_DIR)/%/ Makefile 
 	cd $< && avr-gcc $(CFLAGS) -c $(addprefix ../../,$(filter %.c,$^))
 	avr-ar $(ARFLAGS) rcs $@ $(patsubst $(LIB_DIR)/%.c,$(OBJ_DIR)/%.o,$(filter %.c,$^))
 
 %/:
-	$(MKDIR) $(call FixPath,$@)
+	@$(MKDIR) $(call FixPath,$@)
+
+#Variable dependencies
+$(BUILD_DIR)/%.VARDEP: $(BUILD_DIR)/
+	$(RM) $(call FixPath,$(BUILD_DIR)/*.VARDEP) 2> nul
+	$(TOUCH) $(call FixPath,$@)
 
 
 .PHONY: program
@@ -110,5 +106,5 @@ endif
 
 .PHONY: clean
 clean:
-	$(RMDIR) $(call FixPath,$(BIN_DIR) $(OBJ_DIR) $(BUILD_DIR))
-	$(RM) $(call FixPath,$(LIB_DIR)/*.a)
+	-@$(RMDIR) $(call FixPath,$(BIN_DIR) $(OBJ_DIR) $(BUILD_DIR)) 2> nul
+	-@$(RM) $(call FixPath,$(LIB_DIR)/*.a) 2> nul
