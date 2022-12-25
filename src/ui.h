@@ -7,9 +7,7 @@
 #define SUBSYS_BRAKES_MASK		1
 #define SUBSYS_BLINKERS			2
 #define SUBSYS_BLINKERS_MASK	3
-#define SUBSYS_HAZARDS			4
-#define SUBSYS_HAZARDS_MASK		5
-#define SUBSYS_STAGING			6
+#define SUBSYS_STAGING			4
 
 #define COMBO2(a1,a2)		((a1 << 2) | (a2))
 #define COMBO4(a1,a2,a3,a4)	((a1 << 6) | (a2 << 4) | (a3 << 2) | (a4))
@@ -18,8 +16,8 @@
 #define COMBO_HAZARDS	COMBO2(RIGHT,RIGHT)
 #define COMBO_CONFIG	COMBO4(LEFT,RIGHT,LEFT,RIGHT)
 
-#define COMBO_MIN_DURATION	4 // in 100ms
-#define COMBO_MAX_DURATION	8 // in 100ms
+#define COMBO_MIN_DURATION	3 // in 100ms
+#define COMBO_MAX_DURATION	6 // in 100ms
 #define COMBO_MAX_PAUSE		2 // in 100ms
 
 #define UI_MAIN				0
@@ -36,6 +34,7 @@ struct Ui_t {
 	uint8_t timer;
 	uint8_t combo;
 	uint8_t flag;
+	uint8_t hazards;
 };
 
 void ui_main();

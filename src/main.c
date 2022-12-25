@@ -35,7 +35,7 @@ uint16_t clk; // 1/CYCLES_PER_MS step clock
 uint8_t clk_100ms; // ~100ms step clock
 
 struct Config_t Config = {
-	.front_duty = 127, .rear_duty = 32, .brake_duty = 255, .blinkers = 1, .lights = 0
+	.front_duty = 127, .rear_duty = 32, .brake_duty = 255, .blinkers = 1, .lights = !0
 };
 
 struct RxChConfig_t RxChConfig[2] = {
