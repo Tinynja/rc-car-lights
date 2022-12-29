@@ -6,6 +6,12 @@ ifeq ($(PRESET),attiny13)
 	BAUD=76800
 	PORT=COM8
 	LIBS=
+else ifeq ($(PRESET),attiny85)
+	MCU=attiny85
+	PROGRAMMER=ft232r_custom
+	BAUD=76800
+	PORT=COM8
+	LIBS=
 else ifeq ($(PRESET),atmega328p)
 	MCU=atmega328p
 	PROGRAMMER=arduino

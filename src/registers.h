@@ -54,8 +54,13 @@
 #define CSn0		_CSn0(TIMER_NUMBER)
 #define _CSn0(n)	_EXPAND(CS,n,0)
 
-#define TIMSKn		_TIMSKn(TIMER_NUMBER)
-#define _TIMSKn(n)	_EXPAND(TIMSK,n,)
+#if defined(TIMSK)
+	#define TIMSKn		TIMSK
+#else
+	#define TIMSKn		_TIMSKn(TIMER_NUMBER)
+	#define _TIMSKn(n)	_EXPAND(TIMSK,n,)
+#endif
+
 #define TOIEn		_TOIEn(TIMER_NUMBER)
 #define _TOIEn(n)	_EXPAND(TOIE,n,)
 

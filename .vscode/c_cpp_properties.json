@@ -10,7 +10,7 @@
                 "${env:LOCALAPPDATA}/Programs/avr-gcc/lib/gcc/avr/12.1.0/include",
             ],
             "defines": [
-                "__AVR_ATtiny13__"
+                "__AVR_ATtiny85__"
             ],
             "cStandard": "c17",
             "cppStandard": "c++17",
