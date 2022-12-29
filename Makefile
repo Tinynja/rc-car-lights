@@ -21,7 +21,7 @@ LIBS?=$(filter-out %.a,$(wildcard $(LIB_DIR)/*))
 LIBS_A=$(LIBS:$(LIB_DIR)/%=$(LIB_DIR)/lib%.a)
 INCLUDES=$(addprefix -I,$(LIBS))
 
-CFLAGS=-mmcu=$(MCU) $(INCLUDES) -Os -flto -funsigned-char -funsigned-bitfields -ffunction-sections -fdata-sections -Wall -Wno-int-conversion -Wno-comment
+CFLAGS=-mmcu=$(MCU) $(INCLUDES) -Os -flto -funsigned-char -funsigned-bitfields -ffunction-sections -fdata-sections -Wall -Wno-int-conversion -Wno-int-to-pointer-cast -Wno-comment
 
 AVRDUDEFLAGS=-p $(MCU) -c $(PROGRAMMER) -P $(PORT) $(if $(BAUD),-b $(BAUD)) $(if $(NO-CHIP-ERASE),-D) 
 
@@ -54,7 +54,7 @@ all: $(addprefix $(BIN_DIR)/,$(TARGET).elf $(TARGET).eep $(TARGET).hex)
 #Target build rules
 build: $(BIN_DIR)/$(TARGET).elf
 
-$(BIN_DIR)/$(TARGET).elf: $(OBJ_LIST) $(LIBS_A) $(BIN_DIR)/ $(BUILD_DIR)/ $(call VARDEP,MCU)
+$(BIN_DIR)/$(TARGET).elf: $(OBJ_LIST) $(LIBS_A) $(call VARDEP,MCU) | $(BIN_DIR)/ $(BUILD_DIR)/
 	avr-gcc $(CFLAGS) -dumpdir $(BUILD_DIR) -Wl,-Map=build/$(TARGET).map -Wl,--cref -Wl,--print-memory-usage $(filter %.o,$^) $(filter %.a,$^) -o $@
 
 $(BIN_DIR)/$(TARGET).hex: $(BIN_DIR)/$(TARGET).elf
@@ -63,9 +63,9 @@ $(BIN_DIR)/$(TARGET).hex: $(BIN_DIR)/$(TARGET).elf
 $(BIN_DIR)/$(TARGET).eep: $(BIN_DIR)/$(TARGET).elf
 	avr-objcopy -j .eeprom  --set-section-flags=.eeprom=alloc,load --change-section-lma .eeprom=0 --no-change-warnings -O ihex $< $@
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(OBJ_DIR)/ Makefile $(call VARDEP,MCU)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c Makefile $(call VARDEP,MCU) | $(OBJ_DIR)/
 	avr-gcc $(CFLAGS) -MMD -c $< -o $@
-	avr-gcc $(CFLAGS) -S $< -o $(@:%.o=%.s)
+	@avr-gcc $(CFLAGS) -S $< -o $(@:%.o=%.s)
 
 #Static library build rules
 $(LIB_DIR)/lib%.a: $(LIB_DIR)/%/*.c $(LIB_DIR)/%/*.h $(OBJ_DIR)/%/ Makefile 
