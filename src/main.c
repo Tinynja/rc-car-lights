@@ -12,8 +12,8 @@
 #define DEFAULT_PW_MIN				CYCLES_PER_MS*5/4
 #define DEFAULT_PW_RANGE			CYCLES_PER_MS/2
 #define DEFAULT_REVERSE				1
-#define DEFAULT_STEER_LOW_BAND		DEFAULT_PW_RANGE*1/3
-#define DEFAULT_STEER_HIGH_BAND		DEFAULT_PW_RANGE*2/3
+#define DEFAULT_STEER_LOW_BAND		DEFAULT_PW_RANGE/6
+#define DEFAULT_STEER_HIGH_BAND		DEFAULT_PW_RANGE-DEFAULT_STEER_LOW_BAND
 #define DEFAULT_THROTTLE_LOW_BAND	0
 #define DEFAULT_THROTTLE_HIGH_BAND	DEFAULT_PW_RANGE/2
 
@@ -99,31 +99,21 @@ int main(void) {
 				RxCh[i].band_duration = clk_100ms - RxCh[i].band_start_time;
 			}
 		}
-
+	
 		switch (Ui.page) {
-			case UI_CONFIGURATION:
-				ui_configuration();
+			case UI_PAGE_MAIN:
+				ui_page_main();
 				break;
-			case UI_CFG_FRONT:
-				ui_cfg_front();
+			case UI_PAGE_CFG_LIGHTS_DUTY:
+				ui_page_cfg_duty();
 				break;
-			case UI_CFG_REAR:
-				ui_cfg_rear();
+			case UI_PAGE_CONFIGURATION:
+			case UI_PAGE_CFG_CHREVERSE:
+				ui_page_generic_list();
 				break;
-			case UI_CFG_BRAKE:
-				ui_cfg_brake();
+			case UI_PAGE_CFG_CALIBRATION:
+				ui_page_cfg_calibration();
 				break;
-			case UI_CFG_BLINKERS:
-				ui_cfg_blinkers();
-				break;
-			case UI_CFG_CHREVERSE:
-				ui_cfg_chreverse();
-				break;
-			case UI_CFG_CALIBRATION:
-				ui_cfg_calibration();
-				break;
-			default:
-				ui_main();
 		}
 	}
 }
@@ -148,33 +138,3 @@ ISR(PCINT_vect) {
 		RxCh[i].state = new_state;
 	}
 }
-
-uint8_t clamp(uint8_t value, uint8_t min, uint8_t max) {
-	if (value < min) {
-		return min;
-	} else if (value > max) {
-		return max;
-	} else {
-		return value;
-	}
-}
-
-// uint8_t multiply_fraction_repeatedly(uint8_t a, uint8_t b_num, uint8_t b_den, uint8_t n) {
-//     // Multiply number *a* by fraction *b_num/b_den*, *n* times,
-//     // round to neareast unit each time
-//     // WARNING: choose b_num wisely so that 2*a*b_num does not exceed sizeof(int)
-//     for (uint8_t i = 1; i <= n; i++)
-//         // (2*___+1)/2 rounds to unit without using floats
-//         a = (2*a*b_num/b_den+1)/2;
-//     return a;
-// }
-
-// uint8_t normalize_pwm(uint8_t pwm) {
-//     if (pwm <= 19) {
-//         return pwm;
-//     } else if (pwm <= 27) {
-//         return multiply_fraction_repeatedly(20, 34, 29, pwm-19);
-//     } else {
-//         return multiply_fraction_repeatedly(255, 29, 34, 35-pwm);
-//     }
-// }

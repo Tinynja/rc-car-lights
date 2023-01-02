@@ -8,5 +8,6 @@
 
 // Functions
 uint8_t clamp(uint8_t value, uint8_t min, uint8_t max);
+uint16_t normalize_duty(uint16_t value, uint16_t range);
 
 #endif //UTILS_H
