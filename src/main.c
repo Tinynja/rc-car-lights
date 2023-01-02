@@ -34,11 +34,13 @@ At 16MHz:
 uint16_t clk; // 1/CYCLES_PER_MS step clock
 uint8_t clk_100ms; // ~100ms step clock
 
-struct Config_t Config = {
-	.front_duty = 127, .rear_duty = 32, .brake_duty = 255, .blinkers = 1, .lights = !0
+struct Config_t Config;
+struct Config_t ConfigEE EEMEM = {
+	.front_duty = 127, .rear_duty = 32, .brake_duty = 255, .blinkers = 1, .lights = 0
 };
 
-struct RxChConfig_t RxChConfig[2] = {
+struct RxChConfig_t RxChConfig[2];
+struct RxChConfig_t RxChConfigEE[2] EEMEM = {
 	{&GPORT(RX_PORT), RX_CH1, DEFAULT_PW_MIN, DEFAULT_PW_RANGE, DEFAULT_REVERSE, DEFAULT_STEER_LOW_BAND, DEFAULT_STEER_HIGH_BAND},
 	{&GPORT(RX_PORT), RX_CH2, DEFAULT_PW_MIN, DEFAULT_PW_RANGE, DEFAULT_REVERSE, DEFAULT_THROTTLE_LOW_BAND, DEFAULT_THROTTLE_HIGH_BAND},
 };
@@ -54,7 +56,9 @@ int main(void) {
 	#endif
 
 	// Read Config from EEPROM
-	// TODO
+	eeprom_read_block(&RxChConfig, &RxChConfigEE, sizeof(RxChConfigEE));
+	eeprom_read_block(&Config, &ConfigEE, sizeof(ConfigEE));
+	Config.lights = !Config.lights;
 
 	// Set receiver channel pins as input
 	_MMIO_BYTE(RxChConfig[STEERING].ddrx) &= ~_BV(RxChConfig[STEERING].pxn);

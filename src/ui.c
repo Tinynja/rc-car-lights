@@ -3,10 +3,13 @@
 #include "utils.h"
 #include "ui.h"
 #include <avr/io.h>
+#include <avr/eeprom.h>
 
 extern uint8_t clk_100ms;
 extern struct Config_t Config;
+extern struct Config_t ConfigEE EEMEM;
 extern struct RxChConfig_t RxChConfig[2];
+extern struct RxChConfig_t RxChConfigEE[2] EEMEM;
 extern struct RxCh_t RxCh[2];
 
 struct Ui_t Ui = {
@@ -63,10 +66,10 @@ void ui_page_main() {
 		// Combo detection
 		Ui.flag = 0;
 		if ((Ui.combo & 0xF) == COMBO_LIGHTS) {
-			// TODO: Write lights to EEPROM
 			Config.lights = !Config.lights;
 			Lights[SUBSYS_BRAKES] = LEFT_RIGHT_MASK | (Config.lights << LIGHTS_FRONT);
 			Ui.combo = Ui.combo << 2;
+			eeprom_update_byte(&ConfigEE.lights, Config.lights);
 		} else if ((Ui.combo & 0xF) == COMBO_HAZARDS) {
 			Lights[SUBSYS_BLINKERS] = -Config.lights;
 			Ui.hazards = !Ui.hazards;
@@ -169,7 +172,7 @@ void ui_list_configuration() {
 			case UI_CFG_IDX_BLINKERS:
 				Config.blinkers = !Config.blinkers;
 				GDDR(LIGHTS_PORT) |= LEFT_RIGHT_MASK;
-				Ui.blink_index = 1;
+				Ui.index = Ui.blink_index = 1;
 				Ui.timer = clk_100ms + CFG_CONFIRMATION_DURATION;
 				break;
 			case UI_CFG_IDX_CHREVERSE:
@@ -178,6 +181,7 @@ void ui_list_configuration() {
 				Ui.max_index = sizeof(RxChConfig)/sizeof(RxChConfig[0]);
 				break;
 			case UI_CFG_IDX_CALIBRATION:
+				GDDR(LIGHTS_PORT) &= ~LEFT_RIGHT_MASK;
 				Ui.page = UI_PAGE_CFG_CALIBRATION;
 				Ui.timer = clk_100ms+30;
 				Ui.flag = 0;
@@ -187,6 +191,7 @@ void ui_list_configuration() {
 				OCRnA = Config.front_duty;
 				Ui.page = UI_PAGE_MAIN;
 				Ui.combo = Ui.hazards = 0;
+				eeprom_update_block(&Config, &ConfigEE, sizeof(Config));
 		}
 	} else {
 		Ui.flag = 0;
@@ -263,7 +268,8 @@ void ui_page_cfg_calibration() {
 		RxChConfig[STEERING].high_band = RxChConfig[STEERING].pw_range - RxChConfig[STEERING].low_band;
 		RxChConfig[THROTTLE].low_band = 0;
 		RxChConfig[THROTTLE].high_band = RxCh[THROTTLE].value + RxChConfig[THROTTLE].pw_range/16u;
-
+		
 		ui_pageinit_configuration();
+		eeprom_update_block(&RxChConfig, &RxChConfigEE, sizeof(RxChConfig));
 	}
 }
