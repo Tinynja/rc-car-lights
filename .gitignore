@@ -2,5 +2,3 @@ bin/
 build/
 obj/
 lib/*.a
-test/
-extras/ATMEL
