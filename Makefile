@@ -95,7 +95,7 @@ $(LIB_DIR)/lib%.a: $(OBJ_DIR)/%/ $(LIB_DIR)/%/*.c $(LIB_DIR)/%/*.h Makefile
 	avr-ar $(ARFLAGS) rcs $@ $(patsubst $(LIB_DIR)/%.c,$(OBJ_DIR)/%.o,$(filter %.c,$^))
 
 #Variable dependencies
-$(BUILD_DIR)/%.VARDEP: $(BUILD_DIR)/
+$(BUILD_DIR)/%.VARDEP: | $(BUILD_DIR)/
 	$(RM) $(call FixPath,$(BUILD_DIR)/*.VARDEP) 2> nul
 	$(TOUCH) $(call FixPath,$@)
 
